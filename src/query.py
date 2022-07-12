@@ -1,16 +1,50 @@
+from __future__ import unicode_literals
 from flask import (
-    Blueprint, request, jsonify
+    Blueprint, request, Response, jsonify
 )
+import json
+import yt_dlp
+
 
 bp = Blueprint('query', __name__, url_prefix='/query')
 
 @bp.get('/metadata')
-def metadata():
+async def metadata():
     url = request.args.get('url')
 
-    data = {
-        'url' : url,
-        'title': 'Fast Title - Good Artist',
-        'thumb': 'songthumb.png'
+    data = await getVideoInfo(url)
+    # data = rawData.get_json()
+    if data is None:
+        return Response(json.dump({ 'Error': 'Not Found' }), status=404, mimetype='application/json') 
+    else:
+        payload = {
+            'url': url,
+            'title': data['title'],
+            'description': data['description'],
+            'thumb': data['thumbnail'],
+            'duration': data['duration']
+        }
+        return jsonify(payload)
+
+async def getVideoInfo(url):
+    info = await fetchVideoInfo(url)
+    if info is None:
+        pass
+    else:
+        return info
+
+async def fetchVideoInfo(url):
+    ydl_opts = {
+        'format': 'bestaudio/best'
     }
-    return jsonify(data)
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(url, download = False)
+
+        if info is None:
+            print('No Data')
+            return None
+        else:
+            print('Data Found!')
+            # return json.dumps(ydl.sanitize_info(info))
+            return ydl.sanitize_info(info)

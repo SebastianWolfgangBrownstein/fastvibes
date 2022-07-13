@@ -25,8 +25,14 @@ def create_app(test_config=None):
     def index():
         return "FasterVibes API"
 
-    from . import query
-    app.register_blueprint(query.bp)
+    from . import metadata
+    app.register_blueprint(metadata.bp)
+
+    from . import convert
+    app.register_blueprint(convert.bp)
+
+    from . import download
+    app.register_blueprint(download.bp)
 
     return app
 

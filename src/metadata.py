@@ -12,6 +12,9 @@ bp = Blueprint('metadata', __name__, url_prefix='/meta')
 async def metadata():
     url = request.args.get('url')
 
+    if url is None:
+        return Response(json.dump({'Error': 'No URL Query Provided'}), status=400, mimetype='application/json')
+
     data = await getVideoInfo(url)
     # data = rawData.get_json()
     if data is None:

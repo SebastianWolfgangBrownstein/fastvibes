@@ -6,7 +6,7 @@ from flask import (
     Blueprint, current_app, request, Response, send_from_directory
 )
 
-bp = Blueprint('download', __name__)
+bp = Blueprint('download', __name__, url_prefix='/download')
 
 @bp.post('/')
 def download():

@@ -6,7 +6,7 @@ from flask import (
     Blueprint, current_app, request, Response, jsonify
 )
 
-bp = Blueprint('convert', __name__)
+bp = Blueprint('convert', __name__, url_prefix='/convert')
 
 @bp.post('/')
 def convert():

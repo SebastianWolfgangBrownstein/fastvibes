@@ -8,7 +8,7 @@ from flask import (
 
 bp = Blueprint('download', __name__, url_prefix='/download')
 
-@bp.post('/')
+@bp.post('/audio')
 def download():
     print('Attempting Download...')
     content_type = request.headers.get('Content-Type')

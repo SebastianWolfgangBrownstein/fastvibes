@@ -8,7 +8,7 @@ from flask import (
 
 bp = Blueprint('convert', __name__, url_prefix='/convert')
 
-@bp.post('/')
+@bp.post('/audio')
 def convert():
     print('Attempting Conversion...')
     content_type = request.headers.get('Content-Type')

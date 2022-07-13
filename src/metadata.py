@@ -6,9 +6,9 @@ import json
 import yt_dlp
 
 
-bp = Blueprint('query', __name__, url_prefix='/query')
+bp = Blueprint('metadata', __name__, url_prefix='/meta')
 
-@bp.get('/metadata')
+@bp.get('/query')
 async def metadata():
     url = request.args.get('url')
 

@@ -21,10 +21,6 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    @app.get("/")
-    def index():
-        return "FasterVibes API"
-
     from . import metadata
     app.register_blueprint(metadata.bp)
 
@@ -33,6 +29,10 @@ def create_app(test_config=None):
 
     from . import download
     app.register_blueprint(download.bp)
+
+    @app.get("/")
+    def index():
+        return "FasterVibes API"
 
     return app
 

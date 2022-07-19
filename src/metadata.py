@@ -22,6 +22,7 @@ async def metadata():
     else:
         payload = {
             'url': url,
+            'fileId': data['id'],
             'title': data['title'],
             'description': data['description'],
             'thumb': data['thumbnail'],

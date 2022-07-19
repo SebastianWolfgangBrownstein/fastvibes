@@ -17,6 +17,7 @@ def convert():
     else:
         body = request.json
         url = body['url']
+        fileId = body['fileId']
         title = body['title']
         fileFormat = body['fileFormat']
 
@@ -24,7 +25,7 @@ def convert():
         ydl_opts = {
             'format': 'bestaudio/best',
             'extractaudio': True,
-            'outtmpl': os.path.join(current_app.root_path, 'media/%(title)s.%(ext)s'),
+            'outtmpl': os.path.join(current_app.root_path, 'media/%(id)s.%(ext)s'),
             'ffmpeg_location': '/workspace/ffmpeg/bin',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
@@ -37,6 +38,7 @@ def convert():
             ydl.download(url)
 
         payload = {
-            'filename': "%s.%s" % (title, fileFormat)
+            'title': title,
+            'filename': "%s.%s" % (fileId, fileFormat)
         }
         return jsonify(payload)

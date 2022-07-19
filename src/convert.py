@@ -24,7 +24,11 @@ def convert():
         ydl_opts = {
             'format': 'bestaudio/best',
             'extractaudio': True,
-            'outtmpl': os.path.join(current_app.root_path, 'media/%(title)s.%(ext)s')
+            'outtmpl': os.path.join(current_app.root_path, 'media/%(title)s.%(ext)s'),
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': fileFormat
+            }]
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:

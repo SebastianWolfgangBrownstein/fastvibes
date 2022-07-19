@@ -33,7 +33,6 @@ def convert():
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.p
             print('Starting Conversion...')
             ydl.download(url)
 

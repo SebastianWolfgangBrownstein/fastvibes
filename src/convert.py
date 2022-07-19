@@ -25,14 +25,15 @@ def convert():
             'format': 'bestaudio/best',
             'extractaudio': True,
             'outtmpl': os.path.join(current_app.root_path, 'media/%(title)s.%(ext)s'),
+            'ffmpeg_location': '/workspace/ffmpeg/bin',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
-                'preferredcodec': fileFormat,
-                'ffmpeg-location': '/workspace/ffmpeg/bin'
+                'preferredcodec': fileFormat
             }]
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.p
             print('Starting Conversion...')
             ydl.download(url)
 

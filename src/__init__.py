@@ -30,11 +30,11 @@ def create_app(test_config=None):
     from . import download
     app.register_blueprint(download.bp)
 
-    # @app.get("/")
-    # def index():
-    #     return "FasterVibes API"
+    @app.get("/")
+    def index():
+        return "FasterVibes API"
 
-    # return app
+    return app
 
 
 app = create_app()

@@ -27,7 +27,8 @@ def convert():
             'outtmpl': os.path.join(current_app.root_path, 'media/%(title)s.%(ext)s'),
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
-                'preferredcodec': fileFormat
+                'preferredcodec': fileFormat,
+                'ffmpeg-location': '/workspace/ffmpeg/bin'
             }]
         }
 

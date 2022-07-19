@@ -18,7 +18,7 @@ def convert():
         body = request.json
         url = body['url']
         title = body['title']
-        fileFormat = body['outputFormat']
+        fileFormat = body['fileFormat']
 
         # use --no-keep-video post processor arg
         ydl_opts = {

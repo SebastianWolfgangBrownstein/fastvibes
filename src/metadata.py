@@ -31,7 +31,11 @@ async def metadata():
             'duration': data.get('duration'),
             'durationString': data.get('duration_string'),
             'abr': data.get('abr'),
-            'asr': data.get('asr')
+            'asr': data.get('asr'),
+            'track': data.get('track'),
+            'artist': data.get('artist'),
+            'album': data.get('album'),
+            'releaseYear': data.get('release_year')
         }
         return jsonify(payload)
 
@@ -48,6 +52,7 @@ async def fetchVideoInfo(url):
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        
         info = ydl.extract_info(url, download = False)
 
         if info is None:

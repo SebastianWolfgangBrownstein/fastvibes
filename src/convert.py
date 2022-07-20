@@ -29,7 +29,11 @@ def convert():
             'ffmpeg_location': '/workspace/ffmpeg/bin',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
-                'preferredcodec': fileFormat
+                'preferredcodec': fileFormat,
+                'preferredquality': '192'
+            }, 
+            {
+                'key': 'FFmpegMetadata'
             }]
         }
 

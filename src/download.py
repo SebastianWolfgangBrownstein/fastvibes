@@ -8,15 +8,19 @@ from flask import (
 
 bp = Blueprint('download', __name__, url_prefix='/download')
 
-@bp.post('/audio')
+@bp.get('/audio')
 def download():
     print('Attempting Download...')
-    content_type = request.headers.get('Content-Type')
-    if (content_type != 'application/json'):
-        return Response(json.dump({'Error': 'Content-Type not supported'}), status=400, mimetype='application/json')
+    args = request.args.to_dict()
+    fileId = args.get("fileId")
+    fileFormat = args.get("fileFormat")
+    filename = f"{fileId}.{fileFormat}"
+    # content_type = request.headers.get('Content-Type')
+    if (fileId is None or fileFormat is None):
+        return Response(json.dump({'Error': 'Invalid Download Params'}), status=400, mimetype='application/json')
     else:
-        body = request.json
-        filename = body['filename']
+        # body = request.json
+        # filename = body['filename']
         mediapath = os.path.join(current_app.root_path, 'media')
         return send_from_directory(mediapath, filename, as_attachment=True)
         

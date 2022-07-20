@@ -27,14 +27,18 @@ def convert():
             'extractaudio': True,
             'outtmpl': os.path.join(current_app.root_path, 'media/%(id)s.%(ext)s'),
             'ffmpeg_location': '/workspace/ffmpeg/bin',
+            'postprocessor_args': {
+                'FFmpegMetadata': ['--parse-metadata', '"customTitle:(?P<meta_title>)"', '--add-metadata']
+            },
             'postprocessors': [{
+                'key': 'FFmpegMetadata'
+            },
+            {
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': fileFormat,
                 'preferredquality': '192'
             }, 
-            {
-                'key': 'FFmpegMetadata'
-            }]
+            ]
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:

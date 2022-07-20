@@ -22,11 +22,16 @@ async def metadata():
     else:
         payload = {
             'url': url,
-            'fileId': data['id'],
-            'title': data['title'],
-            'description': data['description'],
-            'thumb': data['thumbnail'],
-            'duration': data['duration']
+            'fileId': data.get('id'),
+            'title': data.get('title'),
+            'channel': data.get('channel'),
+            'creator': data.get('creator'),
+            'description': data.get('description'),
+            'thumb': data.get('thumbnail'),
+            'duration': data.get('duration'),
+            'durationString': data.get('duration_string'),
+            'abr': data.get('abr'),
+            'asr': data.get('asr')
         }
         return jsonify(payload)
 

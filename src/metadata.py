@@ -66,12 +66,12 @@ async def fetchVideoInfo(url):
             return ydl.sanitize_info(info)
 
 def parseTrackAndArtist(title, channel):
-    regex = r'^([\w\s]*)?(?:[\s]+[-][\s]+)([\w\s\(\)]*)'
+    regex = '^([\w\s]*)?(?:[\s]+[-][\s]+)([\w\s\(\)]*)'
     result = re.match(regex, title)
     if result:
         payload = {
-            'artist': result.group(1) | channel,
-            'track': result.group(2) | title
+            'artist': result.group(1) or channel,
+            'track': result.group(2) or title
         }
     else:
         payload = {

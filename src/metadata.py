@@ -3,6 +3,7 @@ from flask import (
     Blueprint, request, Response, jsonify
 )
 import json
+import re
 import yt_dlp
 
 
@@ -20,6 +21,7 @@ async def metadata():
     if data is None:
         return Response(json.dump({ 'Error': 'Not Found' }), status=404, mimetype='application/json') 
     else:
+        trackAndArtist = parseTrackAndArtist(data.get('title'), data.get('channel'))
         payload = {
             'url': url,
             'fileId': data.get('id'),
@@ -32,8 +34,8 @@ async def metadata():
             'durationString': data.get('duration_string'),
             'abr': data.get('abr'),
             'asr': data.get('asr'),
-            'track': data.get('track'),
-            'artist': data.get('artist'),
+            'track': trackAndArtist['track'],
+            'artist': trackAndArtist['artist'],
             'album': data.get('album'),
             'releaseYear': data.get('release_year')
         }
@@ -62,3 +64,29 @@ async def fetchVideoInfo(url):
             print('Data Found!')
             # return json.dumps(ydl.sanitize_info(info))
             return ydl.sanitize_info(info)
+
+def parseTrackAndArtist(title, channel):
+    regex = r'^([\w\s]*)?(?:[\s]+[-][\s]+)([\w\s\(\)]*)'
+    result = re.match(regex, title)
+    if result:
+        payload = {
+            'artist': result.group(1) | channel,
+            'track': result.group(2) | title
+        }
+    else:
+        payload = {
+            'artist': channel,
+            'track': title
+        }
+
+    if " - Topic" in payload['artist']:
+        cleanArtist = payload['artist'].replace(' - Topic', '')
+        payload['artist'] = cleanArtist
+
+    if "(Original Mix)" in payload['track']:
+        cleanTrack = payload['track'].replace(' (Original Mix)', '')
+        payload['track'] = cleanTrack
+
+    print('Parsed Track: ', payload['track'])
+    print('Parsed Artist: ', payload['artist'])
+    return payload

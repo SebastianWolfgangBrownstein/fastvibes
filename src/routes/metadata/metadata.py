@@ -11,9 +11,10 @@ from ...lib.errors.api_errors import (
     BadRequestError
 )
 
-from . import artist
+from . import (artist, track)
 bp = Blueprint('metadata', __name__, url_prefix='/meta')
 bp.register_blueprint(artist.bp)
+bp.register_blueprint(track.bp)
 
 
 @bp.get('/yt')
@@ -85,16 +86,16 @@ async def fetchVideoInfo(url):
             return ydl.sanitize_info(info)
 
 
-@bp.get('/track/isrc/<isrc>')
-async def track_by_isrc(isrc):
-    return f"/track/isrc/{isrc}"
+# @bp.get('/track/isrc/<isrc>')
+# async def track_by_isrc(isrc):
+#     return f"/track/isrc/{isrc}"
 
 
-@bp.get('/track/<mbid>')
-async def track_by_mbid(mbid):
-    return f"/track/{mbid}"
+# @bp.get('/track/<mbid>')
+# async def track_by_mbid(mbid):
+#     return f"/track/{mbid}"
 
 
-@bp.get('/track')
-async def track():
-    return '/track'
+# @bp.get('/track')
+# async def track():
+#     return '/track'

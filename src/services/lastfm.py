@@ -9,11 +9,11 @@ def isolateName(inputDict):
 
 
 class LastFM:
-    root = "https://ws.audioscrobbler.com/2.0/"
+    root_endpoint = "https://ws.audioscrobbler.com/2.0/"
     fmt = "json"
     bio_tag_delimiter = "<a href=\"https://www.last.fm"
 
-    def __init__(self, id='LastFMHandler'):
+    def __init__(self, id='LastFM'):
         self.id = id
 
     @staticmethod
@@ -29,7 +29,7 @@ class LastFM:
             headers = {"User-Agent": USER_AGENT}
 
             response = requests.get(
-                "https://ws.audioscrobbler.com/2.0/", params=params, headers=headers)
+                f"{LastFM.root_endpoint}", params=params, headers=headers)
 
             artistData = response.json().get('artist')
 

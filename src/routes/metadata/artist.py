@@ -7,6 +7,7 @@ from ...lib.errors.api_errors import (
     BadRequestError
 )
 from ...services.lastfm import LastFM
+from ...services.musicbrainz import Brainz
 
 bp = Blueprint('artist', __name__, url_prefix='/artist')
 
@@ -88,6 +89,29 @@ async def artist_tags():
         return Response(json.dump({'Error': 'Internal Server Error'}), status=500, mimetype='application/json')
 
 
+@bp.get('/links')
+async def artist_links():
+    try:
+        args = request.args
+        artist = args.get('artist')
+        return
+    except BadRequestError as e:
+        print(f'BadRequestError: {e}')
+        return Response(f"BadRequestError: {e}", status=400, mimetype='application/json')
+    except Exception as e:
+        print(f'UncaughtException: {e}')
+        return Response(json.dump({'Error': 'Internal Server Error'}), status=500, mimetype='application/json')
+
+
 @bp.get('/<mbid>')
 async def artist_by_mbid(mbid):
-    return f"/artist/{mbid}"
+    try:
+        artist = await Brainz.findArtist(mbid)
+
+        return jsonify(artist)
+    except BadRequestError as e:
+        print(f'BadRequestError: {e}')
+        return Response(f"BadRequestError: {e}", status=400, mimetype='application/json')
+    except Exception as e:
+        print(f'UncaughtException: {e}')
+        return Response(json.dump({'Error': 'Internal Server Error'}), status=500, mimetype='application/json')

@@ -3,15 +3,15 @@ from flask import (
     Blueprint, request, Response, jsonify
 )
 import json
-import re
 import yt_dlp
 
 from .services import (deezer, lastfm)
+from .util.parsers import parseTrackAndArtist
 
 bp = Blueprint('metadata', __name__, url_prefix='/meta')
 
 
-@bp.get('/query')
+@bp.get('/yt')
 async def metadata():
     url = request.args.get('url')
 
@@ -80,28 +80,26 @@ async def fetchVideoInfo(url):
             return ydl.sanitize_info(info)
 
 
-def parseTrackAndArtist(title, channel):
-    regex = '^([\w\s]*)?(?:[\s]+[-][\s]+)([\w\s\(\)]*)'
-    result = re.match(regex, title)
-    if result:
-        payload = {
-            'artist': result.group(1) or channel,
-            'track': result.group(2) or title
-        }
-    else:
-        payload = {
-            'artist': channel,
-            'track': title
-        }
+@bp.get('/artist/<mbid>')
+async def artist_by_mbid(mbid):
+    return f"/artist/{mbid}"
 
-    if " - Topic" in payload['artist']:
-        cleanArtist = payload['artist'].replace(' - Topic', '')
-        payload['artist'] = cleanArtist
 
-    if "(Original Mix)" in payload['track']:
-        cleanTrack = payload['track'].replace(' (Original Mix)', '')
-        payload['track'] = cleanTrack
+@bp.get('/artist')
+async def artist():
+    return '/meta/artist'
 
-    print('Parsed Track: ', payload['track'])
-    print('Parsed Artist: ', payload['artist'])
-    return payload
+
+@bp.get('/track/isrc/<isrc>')
+async def track_by_isrc(isrc):
+    return f"/track/isrc/{isrc}"
+
+
+@bp.get('/track/<mbid>')
+async def track_by_mbid(mbid):
+    return f"/track/{mbid}"
+
+
+@bp.get('/track')
+async def track():
+    return '/track'

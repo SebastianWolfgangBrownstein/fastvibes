@@ -4,11 +4,16 @@ from flask import (
 )
 import json
 import yt_dlp
+from ...services.lastfm import LastFM
+from ...services import (deezer, lastfm)
+from ...lib.parsers import parseTrackAndArtist
+from ...lib.errors.api_errors import (
+    BadRequestError
+)
 
-from .services import (deezer, lastfm)
-from .util.parsers import parseTrackAndArtist
-
+from . import artist
 bp = Blueprint('metadata', __name__, url_prefix='/meta')
+bp.register_blueprint(artist.bp)
 
 
 @bp.get('/yt')
@@ -27,7 +32,7 @@ async def metadata():
             data.get('title'), data.get('channel'))
 
         deezerData = await deezer.getDeezerData(trackAndArtist['artist'], trackAndArtist['track'])
-        artistBio = await lastfm.getArtistBio(trackAndArtist['artist'])
+        artistBio = await LastFM.getArtistBio(trackAndArtist['artist'])
         payload = {
             'url': url,
             'fileId': data.get('id'),
@@ -45,7 +50,7 @@ async def metadata():
             'dzid': deezerData and deezerData.get('dzid'),
             'releaseDate': deezerData and deezerData.get('release_date'),
             'artistThumb': deezerData and deezerData.get('artist_thumb'),
-            'artistBio': artistBio,
+            'artistBio': artistBio and artistBio.get('bio'),
             'track': trackAndArtist['track'],
             'artist': trackAndArtist['artist'],
             'album': data.get('album')
@@ -78,16 +83,6 @@ async def fetchVideoInfo(url):
             print('Data Found!')
             # return json.dumps(ydl.sanitize_info(info))
             return ydl.sanitize_info(info)
-
-
-@bp.get('/artist/<mbid>')
-async def artist_by_mbid(mbid):
-    return f"/artist/{mbid}"
-
-
-@bp.get('/artist')
-async def artist():
-    return '/meta/artist'
 
 
 @bp.get('/track/isrc/<isrc>')

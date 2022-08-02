@@ -2,6 +2,7 @@ import os
 from flask import Flask
 # from flask_cors import CORS
 
+
 def create_app(test_config=None):
     # create and configure app
     app = Flask(__name__, instance_relative_config=True)
@@ -21,7 +22,7 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from . import metadata
+    from .routes.metadata import metadata
     app.register_blueprint(metadata.bp)
 
     from . import convert

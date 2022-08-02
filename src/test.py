@@ -1,7 +1,7 @@
 from flask import (
     Blueprint, request, Response, jsonify
 )
-from . import deezer
+from .services import deezer
 
 bp = Blueprint('test', __name__, url_prefix='/test')
 

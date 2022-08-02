@@ -6,7 +6,7 @@ import json
 import re
 import yt_dlp
 
-from .services import deezer
+from .services import (deezer, lastfm)
 
 bp = Blueprint('metadata', __name__, url_prefix='/meta')
 
@@ -27,7 +27,7 @@ async def metadata():
             data.get('title'), data.get('channel'))
 
         deezerData = await deezer.getDeezerData(trackAndArtist['artist'], trackAndArtist['track'])
-
+        artistBio = await lastfm.getArtistBio(trackAndArtist['artist'])
         payload = {
             'url': url,
             'fileId': data.get('id'),
@@ -45,6 +45,7 @@ async def metadata():
             'dzid': deezerData and deezerData.get('dzid'),
             'releaseDate': deezerData and deezerData.get('release_date'),
             'artistThumb': deezerData and deezerData.get('artist_thumb'),
+            'artistBio': artistBio,
             'track': trackAndArtist['track'],
             'artist': trackAndArtist['artist'],
             'album': data.get('album')

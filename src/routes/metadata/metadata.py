@@ -4,11 +4,15 @@ from flask import (
 )
 import json
 import yt_dlp
+
 from ...services.lastfm import LastFM
-from ...services import (deezer, lastfm)
-from ...lib.parsers import parseTrackAndArtist
+from ...services.deezer import Deezer
+from ...services.musicbrainz import Brainz
+
+from ...lib.parsers.parseTrackAndArtist import parseTrackAndArtist
 from ...lib.errors.api_errors import (
-    BadRequestError
+    BadRequestError,
+    NotFoundError
 )
 
 from . import (artist, track)
@@ -20,44 +24,53 @@ bp.register_blueprint(track.bp)
 @bp.get('/yt')
 async def metadata():
     url = request.args.get('url')
+    try:
+        if url is None:
+            return Response(json.dump({'Error': 'No URL Query Provided'}), status=400, mimetype='application/json')
 
-    if url is None:
-        return Response(json.dump({'Error': 'No URL Query Provided'}), status=400, mimetype='application/json')
+        data = await getVideoInfo(url)
 
-    data = await getVideoInfo(url)
-    # data = rawData.get_json()
-    if data is None:
-        return Response(json.dump({'Error': 'Not Found'}), status=404, mimetype='application/json')
-    else:
-        trackAndArtist = parseTrackAndArtist(
-            data.get('title'), data.get('channel'))
+        if data is None:
+            raise NotFoundError('Video not found')
+        else:
+            trackAndArtist = parseTrackAndArtist(
+                data.get('title'), data.get('channel'))
+            deezerData = await Deezer.getTrackData(trackAndArtist['artist'], trackAndArtist['track'])
+            recordingData = await Brainz.ISRC(deezerData.get('isrc'), populate=True)
+            artistBio = await LastFM.getArtistBio(trackAndArtist['artist'])
 
-        deezerData = await deezer.getDeezerData(trackAndArtist['artist'], trackAndArtist['track'])
-        artistBio = await LastFM.getArtistBio(trackAndArtist['artist'])
-        payload = {
-            'url': url,
-            'fileId': data.get('id'),
-            'title': data.get('title'),
-            'channel': data.get('channel'),
-            'creator': data.get('creator'),
-            'description': data.get('description'),
-            'thumb': data.get('thumbnail'),
-            'duration': data.get('duration'),
-            'durationString': data.get('duration_string'),
-            'abr': data.get('abr'),
-            'asr': data.get('asr'),
-            'bpm': deezerData and deezerData.get('bpm') or 0,
-            'isrc': deezerData and deezerData.get('isrc'),
-            'dzid': deezerData and deezerData.get('dzid'),
-            'releaseDate': deezerData and deezerData.get('release_date'),
-            'artistThumb': deezerData and deezerData.get('artist_thumb'),
-            'artistBio': artistBio and artistBio.get('bio'),
-            'track': trackAndArtist['track'],
-            'artist': trackAndArtist['artist'],
-            'album': data.get('album')
+            payload = {
+                'url': url,
+                'fileId': data.get('id'),
+                'title': data.get('title'),
+                'channel': data.get('channel'),
+                'creator': data.get('creator'),
+                'description': data.get('description'),
+                'thumb': data.get('thumbnail'),
+                'duration': data.get('duration'),
+                'durationString': data.get('duration_string'),
+                'abr': data.get('abr'),
+                'asr': data.get('asr'),
+                'bpm': deezerData and deezerData.get('bpm') or 0,
+                'isrc': deezerData and deezerData.get('isrc'),
+                'dzid': deezerData and deezerData.get('dzid'),
+                'recordingMBID': recordingData and recordingData.get('recording_mbid'),
+                'releaseDate': deezerData and deezerData.get('release_date'),
+                'artistThumb': deezerData and deezerData.get('artist_thumb'),
+                'artistBio': artistBio and artistBio.get('bio'),
+                'artistMBID': recordingData and recordingData.get('artist_mbid'),
+                'track': trackAndArtist['track'],
+                'artist': trackAndArtist['artist'],
+                'album': data.get('album')
 
-        }
-        return jsonify(payload)
+            }
+            return jsonify(payload)
+    except NotFoundError as e:
+        print(f'NotFoundError: {e}')
+        return Response(f"NotFoundError: {e}", status=404, mimetype='application/json')
+    except Exception as e:
+        print(f'UncaughtException: {e}')
+        return Response('Internal Server Error', status=500, mimetype='application/json')
 
 
 async def getVideoInfo(url):

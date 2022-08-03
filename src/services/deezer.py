@@ -37,7 +37,7 @@ class Deezer:
                 'track': data.get('title'),
                 'artist': data.get('artist').get('name'),
                 'artist_thumb': data.get('artist').get('picture_big'),
-                'deezid': data.get('id'),
+                'dzid': data.get('id'),
                 'isrc': data.get('isrc'),
                 'release_date': data.get('release_date'),
                 'bpm': data.get('bpm'),

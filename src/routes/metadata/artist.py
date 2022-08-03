@@ -22,9 +22,10 @@ async def artist():
         if artist is None:
             raise BadRequestError('artist parameter is undefined')
 
-        data = await LastFM.getArtistData(artist)
-
-        return jsonify(data)
+        lastFMData = await LastFM.getArtistData(artist)
+        brainzData = await Brainz.findArtistByName(artist, populate=True)
+        # eventually merge all data sources here
+        return jsonify(brainzData)
     except BadRequestError as e:
         print(f'BadRequestError: {e}')
         return Response(f"BadRequestError: {e}", status=400, mimetype='application/json')
@@ -94,7 +95,13 @@ async def artist_links():
     try:
         args = request.args
         artist = args.get('artist')
-        return
+        brainzData = await Brainz.findArtistByName(artist, populate=True)
+        parsedLinks = Brainz.formatArtistLinks(brainzData)
+        responsePayload = {
+            'artist': artist,
+            'artistLinks': parsedLinks
+        }
+        return jsonify(responsePayload)
     except BadRequestError as e:
         print(f'BadRequestError: {e}')
         return Response(f"BadRequestError: {e}", status=400, mimetype='application/json')

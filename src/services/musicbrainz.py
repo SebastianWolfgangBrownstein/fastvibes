@@ -2,7 +2,7 @@ import requests
 from ..constants.headers import USER_AGENT
 
 ROOT_ENDPOINT = "https://musicbrainz.org/ws/2"
-LINK_TYPES = ["bandcamp", "discogs", "soundcloud", "youtube",
+LINK_TYPES = ["bandcamp", "discogs", "soundcloud", "youtube", "streaming",
               "free streaming", "official homepage", "purchase for download"]
 
 
@@ -80,6 +80,37 @@ class Brainz:
         except Exception as e:
             return None
 
+    async def findArtistByName(artist, populate=False):
+
+        try:
+            params = {
+                'query': f'artist:"{artist}"',
+                'fmt': Brainz.fmt
+            }
+
+            headers = {"User-Agent": USER_AGENT}
+            response = requests.get(
+                f"{Brainz.root_endpoint}/artist", params=params, headers=headers)
+
+            artists = response.json().get('artists')
+
+            if artists is None:
+                return None
+
+            topArtistMatch = artists[0]
+            artist_mbid = topArtistMatch.get('id')
+            artistIdPayload = {
+                'artist': artist,
+                'mbid': artist_mbid
+            }
+            if populate is False:
+                return artistIdPayload
+
+            artistData = await Brainz.findArtist(artist_mbid)
+            return artistData
+        except Exception as e:
+            return None
+
     @staticmethod
     async def _formatRecordingData(data, isrc=None):
         try:
@@ -120,26 +151,13 @@ class Brainz:
             'release_country': rawRelease.get('country')
         }
 
-
-async def get_artist_links_by_artist_MBID(mbid):
-    try:
-        params = {
-            'inc': 'url-rels',
-            'fmt': 'json'
-        }
-
-        headers = {"User-Agent": USER_AGENT}
-
-        response = requests.get(
-            f"{ROOT_ENDPOINT}/artist/{mbid}", params=params, headers=headers)
-
-        jsonLinks = response.json().get("relations")
-
+    @staticmethod
+    def formatArtistLinks(linkList):
+        jsonLinks = linkList.get("relations")
         filteredLinks = filter(filterLinkByType, jsonLinks)
         artistLinks = map(extractEssentialLinkInfo, filteredLinks)
-        return list(artistLinks)
-    except Exception as e:
-        return None
+        typedLinks = map(detectLinkType, artistLinks)
+        return list(typedLinks)
 
 
 def filterLinkByType(rawLink):
@@ -147,9 +165,37 @@ def filterLinkByType(rawLink):
 
 
 def extractEssentialLinkInfo(rawLink):
-    linkType = rawLink.get('type')
     linkUrl = rawLink.get('url').get('resource')
+    linkType = rawLink.get('type')
+
     return {
         "type": linkType,
         "url": linkUrl
+    }
+
+
+def detectLinkType(link):
+    linkUrl = link['url']
+    rawLinkType = link['type']
+    linkType = rawLinkType
+
+    if rawLinkType == 'official homepage':
+        linkType = 'official'
+    elif (rawLinkType == 'free streaming') and ("spotify" in linkUrl):
+        linkType = 'spotify'
+    elif rawLinkType == 'purchase for download':
+        if "apple" in linkUrl:
+            linkType = 'apple_music'
+        elif "beatport" in linkUrl:
+            linkType = 'beatport'
+        elif "junodownload" in linkUrl:
+            linkType = 'juno'
+        elif "google" in linkUrl:
+            linkType = 'google_play'
+        elif "7digital" in linkUrl:
+            linkType = '7digital'
+
+    return {
+        **link,
+        "type": linkType
     }

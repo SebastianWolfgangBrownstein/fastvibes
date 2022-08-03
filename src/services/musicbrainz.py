@@ -1,7 +1,6 @@
 import requests
 from ..constants.headers import USER_AGENT
 
-ROOT_ENDPOINT = "https://musicbrainz.org/ws/2"
 LINK_TYPES = ["bandcamp", "discogs", "soundcloud", "youtube", "streaming",
               "free streaming", "official homepage", "purchase for download"]
 
